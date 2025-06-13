@@ -1,0 +1,142 @@
+<div class="header">
+    <div class="logo-container">
+        <img src="/static/images/logo.png" class="logo">
+        <a id="homeBtn" href="/static/index.html" class="home-btn">Главная</a>
+    </div>
+    <div class="nav-tabs">
+        <a id="homeTab" href="/static/index.html" style="display: none;">Главная</a>
+        <a id="cabinetTab" href="/static/cabinet.html" style="display: none;">Кабинет</a>
+        <button id="loginTab" onclick="window.showLoginModal()" style="display: inline;">Войти</button>
+        <button id="logoutTab" style="display: none;">Выйти</button>
+    </div>
+    <div class="contact-info">
+        <span class="contact-item">info@art-remont.ru</span>
+        <span class="contact-item">Ежедневно 8:00–23:00</span>
+        <a href="tel:+79063976362" class="contact-item phone">+7 (906) 397-63-62</a>
+        <button id="callBackBtn" class="call-back-btn">Перезвоните мне</button>
+    </div>
+</div>
+<style>
+    .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #f8f8f8;
+        border-bottom: 1px solid #ccc;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+    }
+    .logo {
+        width: 60px;
+        height: auto;
+        margin-right: 2px; /* Minimized margin to bring nav-tabs close */
+    }
+    .logo-container {
+        display: flex;
+        align-items: center;
+    }
+    .home-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        font-weight: 500;
+        color: #333;
+        cursor: pointer;
+        padding: 4px 8px;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+    }
+    .home-btn:hover {
+        background-color: #e0e0e0;
+        border-radius: 4px;
+    }
+    .home-btn.active {
+        background-color: #4b5563;
+        color: white;
+        border-radius: 4px;
+        position: relative;
+    }
+    .home-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #1f2937;
+        border-radius: 2px;
+    }
+    .nav-tabs {
+        display: flex;
+        gap: 2px; /* Minimized gap between nav items for closeness */
+        margin-left: 0; /* No margin to ensure nav-tabs are right next to logo-container */
+    }
+    .nav-tabs a, .nav-tabs button {
+        text-decoration: none;
+        color: #333;
+        font-size: 16px;
+        padding: 5px 8px; /* Slightly reduced padding to tighten spacing */
+        background: none;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s ease, background-color 0.2s ease;
+    }
+    .nav-tabs a:hover, .nav-tabs button:hover {
+        background-color: #e0e0e0;
+        border-radius: 4px;
+    }
+    .nav-tabs a.active, .nav-tabs button.active {
+        background-color: #4b5563;
+        color: white;
+        border-radius: 4px;
+        position: relative;
+    }
+    .nav-tabs a.active::after, .nav-tabs button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #1f2937;
+        border-radius: 2px;
+    }
+    .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 12px;
+        color: #333;
+        white-space: nowrap;
+        margin-right: 20px; /* Retained right margin for offset */
+    }
+    .contact-item {
+        margin: 0;
+    }
+    .contact-info a.phone {
+        color: #4b5563;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .contact-info a.phone:hover {
+        text-decoration: underline;
+    }
+    .call-back-btn {
+        padding: 4px 8px;
+        background-color: #f97316;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .call-back-btn:hover {
+        background-color: #fb923c;
+    }
+</style>

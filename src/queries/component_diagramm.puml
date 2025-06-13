@@ -1,0 +1,69 @@
+@startuml
+package "Server (src/)" {
+  [main.py] #--> [api.py]
+  [main.py] #--> [database.py]
+  [main.py] #--> [models.py]
+  [main.py] --> [PostgreSQL]
+  [api.py] --> [models.py]
+  [api.py] --> [database.py]
+  [main.py] --> [Static Files]
+}
+
+package "Client (static/)" {
+  [index.html] --> [index.js]
+  [index.html] --> [header.html]
+  [index.html] --> [header.js]
+  [cabinet.html] --> [cabinet.js]
+  [cabinet.html] --> [header.html]
+  [cabinet.html] --> [header.js]
+}
+
+[Static Files] --> [Client (static/)]
+[Client (static/)] --> [Browser]
+[Browser] --> [main.py] : HTTP Requests (e.g., /repairs/estimates)
+
+[main.py] --> [FastAPI]
+[database.py] --> [SQLAlchemy]
+[SQLAlchemy] --> [PostgreSQL]
+
+note right of [main.py]
+  Initializes FastAPI, mounts static files,
+  includes API routes, and sets up database.
+end note
+
+note right of [api.py]
+  Defines API endpoints (/repairs/*) for
+  authentication, estimates, and data management.
+end note
+
+note right of [models.py]
+  SQLAlchemy models for Clients, Users,
+  Premises, WorkTypes, Estimates, etc.
+end note
+
+note right of [database.py]
+  Configures sync and async database engines
+  and session factories for PostgreSQL.
+end note
+
+note right of [index.html]
+  Main page with estimate calculator form,
+  interacts with API via index.js.
+end note
+
+note right of [cabinet.html]
+  User dashboard for viewing saved estimates,
+  interacts with API via cabinet.js.
+end note
+
+note right of [header.html]
+  Common header for navigation,
+  loaded by index.html and cabinet.html.
+end note
+
+note right of [header.js]
+  Handles authentication status and
+  navigation tab visibility.
+end note
+
+@enduml

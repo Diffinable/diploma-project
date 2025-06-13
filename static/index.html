@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор стоимости ремонта</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/brushC.ico">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding-top: 50px; /* Reduced to match smaller header height */
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .form-card {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .work-types-section {
+            flex-grow: 1;
+            width: 100%;
+        }
+        .room-selection {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .room-card {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            min-width: 150px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .room-card.current {
+            background-color: #d1d5db;
+            border: 2px solid #4b5563;
+        }
+        .room-card:hover {
+            background-color: #e5e7eb;
+        }
+        .room-card label {
+            display: block;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        .room-card input {
+            width: 80px;
+            padding: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .add-room-btn {
+            width: 40px;
+            height: 40px;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-room-btn:hover {
+            background-color: #6b7280;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .error-border {
+            border: 2px solid red !important;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: medium;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input::-webkit-inner-spin-button,
+        .form-group input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .table-wrapper {
+            position: relative;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .total-cost-container {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .total-cost-container button {
+            padding: 5px 10px;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .cost-breakdown {
+            display: flex;
+            gap: 20px;
+        }
+        .cost-breakdown span {
+            margin-right: 10px;
+        }
+        #result {
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        #result .breakdown {
+            margin-bottom: 8px;
+        }
+        #result ul {
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+        .total-cost-container button:hover {
+            background-color: #6b7280;
+        }
+        
+        .work-types-table {
+            width: 100%;
+            max-width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .work-types-table th, .work-types-table td {
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            text-align: left;
+            font-size: 14px;
+        }
+        .work-types-table th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+        }
+        .work-types-table th.price-per-unit,
+        .work-types-table td.price-per-unit {
+            width: 50px;
+        }
+        .work-types-table th.volume,
+        .work-types-table td.volume {
+            width: 70px;
+        }
+        .work-types-table th.cost,
+        .work-types-table td.cost {
+            width: 180px; /* Increased width to accommodate the single line */
+            text-align: left;
+            padding: 4px;
+        }
+        .work-types-table th:nth-child(1),
+        .work-types-table td:nth-child(1) {
+            width: 200px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .work-types-table td.cost {
+            font-size: 12px;
+        }
+        /* .work-types-table td.cost .cost-breakdown {
+            text-align: right;
+            white-space: nowrap; 
+        } */
+
+        /* Remove the separator and multi-line specific styles */
+        .work-types-table td.cost .cost-breakdown .separator {
+            display: none; /* No longer needed */
+        }        
+
+        .work-types-table td.cost .cost-breakdown .separator {
+            border-top: 1px solid #d1d5db;
+            margin: 4px 0; /* Increased margin for a clearer separator */
+        }
+        .work-types-table td input {
+            width: 60px;
+            padding: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .work-types-table td input::-webkit-inner-spin-button,
+        .work-types-table td input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .work-types-table td .apply-volume-btn {
+            margin-left: 5px;
+            padding: 4px 8px;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .work-types-table td .apply-volume-btn:hover {
+            background-color: #6b7280;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover:not(:disabled) {
+            background-color: #6b7280;
+        }
+        button[type="submit"]:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+        .modal-content h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .modal-content .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .modal-content .tab-buttons button {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-content .tab-buttons button.active {
+            background-color: #4b5563;
+            color: white;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .modal-buttons button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .modal-buttons .cancel {
+            background-color: transparent;
+            color: #4b5563;
+            border: none;
+        }
+        .modal-buttons .cancel:hover {
+            color: #1f2937;
+        }
+        .modal-buttons .submit {
+            background-color: #4b5563;
+            color: white;
+            border: none;
+        }
+        .modal-buttons .submit:hover {
+            background-color: #6b7280;
+        }
+        .modal-buttons .submit:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        #result {
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        #result p {
+            margin-bottom: 8px;
+        }
+        #result ul {
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ccc;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            height: 40px;
+        }
+        .logo {
+            width: 60px;
+            height: auto;
+            margin-right: 2px;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .home-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            padding: 4px 8px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+        .home-btn:hover {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+        }
+        .home-btn.active {
+            background-color: #4b5563;
+            color: white;
+            border-radius: 4px;
+            position: relative;
+        }
+        .home-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #1f2937;
+            border-radius: 2px;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 2px;
+            margin-left: 0;
+        }
+        .nav-tabs a, .nav-tabs button {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            padding: 5px 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        .nav-tabs a:hover, .nav-tabs button:hover {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+        }
+        .nav-tabs a.active, .nav-tabs button.active {
+            background-color: #4b5563;
+            color: white;
+            border-radius: 4px;
+            position: relative;
+        }
+        .nav-tabs a.active::after, .nav-tabs button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #1f2937;
+            border-radius: 2px;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 12px;
+            color: #333;
+            white-space: nowrap;
+            margin-right: 20px;
+        }
+        .contact-item {
+            margin: 0;
+        }
+        .contact-info a.phone {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .contact-info a.phone:hover {
+            text-decoration: underline;
+        }
+        .call-back-btn {
+            padding: 4px 8px;
+            background-color: #f97316;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .call-back-btn:hover {
+            background-color: #fb923c;
+        }
+        .category-header {
+            position: sticky;
+            top: calc(37px + (var(--category-index, 0) * 36px));
+            background-color: #e0e0e0;
+            font-weight: bold;
+            cursor: pointer;
+            display: table-cell;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            z-index: 8;
+            border: 1px solid #d1d5db;
+            border-bottom: 2px solid #ccc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .category-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .category-header svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            transition: transform 0.3s;
+        }
+        .category-header.collapsed svg {
+            transform: rotate(-90deg);
+        }
+        .work-row {
+            display: table-row;
+        }
+        .work-row.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <div class="work-types-section">
+            <div class="room-selection" id="room-selection">
+                <button class="add-room-btn" id="add-room-btn">+</button>
+            </div>
+            <div class="form-group">
+                <div class="table-wrapper">
+                    <div class="total-cost-container" id="total-cost-container">
+                        <div class="cost-breakdown">
+                            <span>Итоговая стоимость: <span id="total-cost">0.00 руб</span></span>
+                            <span>Работы: <span id="total-labor-cost">0.00 руб</span></span>
+                            <span>Материалы: <span id="total-material-cost">0.00 руб</span></span>
+                        </div>
+                        <button id="save-button">Сохранить</button>
+                    </div>
+                    <table class="work-types-table">
+                        <thead>
+                            <tr>
+                                <th>Название работы</th>
+                                <th class="price-per-unit">Цена за работу</th>
+                                <th class="volume">Объем работ</th>
+                                <th class="cost">Стоимость</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workTypesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-content">
+            <h2 id="loginModalLabel">Авторизация</h2>
+            <div class="tab-buttons">
+                <button id="loginTabButton" class="active">Вход</button>
+                <button id="registerTabButton">Регистрация</button>
+            </div>
+            <form id="loginForm" style="display: block;">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input id="loginEmail" type="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Пароль:</label>
+                    <input id="loginPassword" type="password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" id="cancelLogin" class="cancel">Отмена</button>
+                    <button type="submit" class="submit">Войти</button>
+                </div>
+            </form>
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="registerName">Имя:</label>
+                    <input id="registerName" type="text" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email:</label>
+                    <input id="registerEmail" type="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Пароль:</label>
+                    <input id="registerPassword" type="password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" id="cancelRegister" class="cancel">Отмена</button>
+                    <button type="submit" class="submit">Зарегистрироваться</button>
+                </div>
+            </form>
+            <p id="loginError" class="error"></p>
+            <p id="registerError" class="error"></p>
+        </div>
+    </div>
+
+<script>
+    fetch('/static/partials/header.html')
+        .then(response => {
+            if (!response.ok) throw new Error(`Failed to fetch header.html: ${response.status} ${response.statusText}`);
+            return response.text();
+        })
+        .then(data => {
+            document.getElementById('header').innerHTML = data;
+            const script = document.createElement('script');
+            script.src = '/static/js/header.js';
+            script.onload = () => {
+                if (typeof window.updateTabVisibility === 'function') window.updateTabVisibility();
+            };
+            script.onerror = () => console.error('Failed to load header.js');
+            document.body.appendChild(script);
+        })
+        .catch(error => console.error('Error loading header:', error.message));
+</script>
+<script src="/static/index.js"></script>
+</body>
+</html>

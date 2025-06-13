@@ -1,0 +1,24 @@
+@startuml
+node "Local Server" {
+  [FastAPI Application] --> [PostgreSQL]
+  [FastAPI Application] --> [Static Files]
+}
+
+node "Client Device" {
+  [Browser] --> [FastAPI Application] : HTTP Requests
+  [Browser] --> [Static Files] : Load HTML/JS
+}
+
+[Static Files] --> [index.html]
+[Static Files] --> [cabinet.html]
+[Static Files] --> [header.html]
+[Static Files] --> [index.js]
+[Static Files] --> [cabinet.js]
+[Static Files] --> [header.js]
+
+node "Database Server" {
+  [PostgreSQL]
+  [pgAdmin] --> [PostgreSQL]
+}
+
+@enduml

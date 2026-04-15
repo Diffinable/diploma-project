@@ -32,14 +32,37 @@ This project was developed as a **Bachelor's Diploma Thesis** at Penza State Uni
 
 ## Getting Started
 
-Follow these steps to run the project locally.
-
 ### Prerequisites
 - Python 3.11+
 - PostgreSQL 15+ (or use Docker)
 - Git
 
-### 1. Clone the Repository
-```bash
+### Docker
+# 1. Сlone a repository
 git clone https://github.com/Diffinable/diploma-project.git
 cd diploma-project
+
+# 2. Set up your environment
+cp .env.example .env
+# Отредактируйте .env: POSTGRES_USER, POSTGRES_PASSWORD, SECRET_KEY, DATABASE_URL
+
+# 3. Run
+docker-compose up --build -d
+
+# 🌐 App: http://localhost:8000
+# 📖 Swagger:    http://localhost:8000/docs
+
+### Local development
+# 1. Virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+.venv\Scripts\activate     # Windows
+
+# 2. Dependencies
+pip install -r requirements.txt
+
+# 3. Migrations
+alembic upgrade head
+
+# 4. Launch
+uvicorn src.main:app --reload --port 8000
